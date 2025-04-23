@@ -15,8 +15,8 @@ const teacherAccountSchema = new mongoose.Schema(
             type: String,
             default: "teacher"
         },
-        city: String,
-        commune: String,
+        provine: String,
+        ward: String,
         school: String,
         surname: String,
         middleName: String,

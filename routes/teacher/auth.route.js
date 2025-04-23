@@ -3,7 +3,6 @@ const router = express.Router();
 const { authenticate } = require('../../middlewares/teacher.middleware');
 const controller = require('../../controllers/teacher/auth.controller');
 
-// Auth routes
 router.post('/register', controller.register);
 router.post('/verify-otp', controller.verifyOtp);
 router.post('/create-account', controller.createAccount);

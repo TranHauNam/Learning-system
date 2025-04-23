@@ -177,8 +177,8 @@ module.exports.completeTeacherProfile = async (req, res) => {
     try {
         const teacherId = req.teacher._id;
         const {
-            city,
-            commune,
+            provine,
+            ward,
             school,
             surname,
             middleName,
@@ -190,8 +190,8 @@ module.exports.completeTeacherProfile = async (req, res) => {
         const updated = await TeacherAccount.findByIdAndUpdate(
             teacherId,
             {
-                city,
-                commune,
+                provine,
+                ward,
                 school,
                 surname,
                 middleName,
