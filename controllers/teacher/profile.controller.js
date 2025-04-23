@@ -54,15 +54,15 @@ module.exports.updateAddress = async (req, res) => {
         const { province, ward, school } = req.body;
 
         // Tạo object chứa thông tin địa chỉ
-        const addressData = {};
-        if (province !== undefined) addressData.province = province;
-        if (ward !== undefined) addressData.ward = ward;
-        if (school !== undefined) addressData.addressDetail = school;
+        const updateAddressData = {};
+        if (province !== undefined) updateAddressData.province = province;
+        if (ward !== undefined) updateAddressData.ward = ward;
+        if (school !== undefined) updateAddressData.school = school;
 
         // Cập nhật thông tin địa chỉ
         const updatedTeacher = await TeacherAccount.findByIdAndUpdate(
             teacherId,
-            { address: addressData },
+            updateAddressData,
             { new: true }
         ).select('-password -token');
 
@@ -74,9 +74,7 @@ module.exports.updateAddress = async (req, res) => {
 
         return res.status(200).json({
             message: 'Cập nhật địa chỉ thành công',
-            data: {
-                address: updatedTeacher.address
-            }
+            data: updatedTeacher
         });
     } catch (error) {
         console.error('Lỗi cập nhật địa chỉ:', error);

@@ -102,7 +102,8 @@ module.exports.createAccount = async (req, res) => {
 
         // Kiểm tra token tạm thời
         const decoded = jwt.verify(tempToken, process.env.JWT_SECRET);
-        if (!decoded.verified) {
+        
+        if (!decoded.email) {
             return res.status(401).json({ 
                 message: 'Token không hợp lệ' 
             });
@@ -177,7 +178,7 @@ module.exports.completeTeacherProfile = async (req, res) => {
     try {
         const teacherId = req.teacher._id;
         const {
-            provine,
+            province,
             ward,
             school,
             surname,
@@ -190,7 +191,7 @@ module.exports.completeTeacherProfile = async (req, res) => {
         const updated = await TeacherAccount.findByIdAndUpdate(
             teacherId,
             {
-                provine,
+                province,
                 ward,
                 school,
                 surname,
@@ -332,7 +333,7 @@ module.exports.verifyResetPasswordOtp = async (req, res) => {
 
         // Tạo token tạm thời để đặt lại mật khẩu
         const resetToken = jwt.sign(
-            { email: otp.email },
+            { email: otpStore.email },
             process.env.JWT_SECRET,
             { expiresIn: '15m' }
         );
@@ -341,7 +342,7 @@ module.exports.verifyResetPasswordOtp = async (req, res) => {
             code: 200,
             message: 'Xác thực OTP thành công',
             data: {
-                email: otp.email,
+                email: otpStore.email,
                 resetToken
             }
         });

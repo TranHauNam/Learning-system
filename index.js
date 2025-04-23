@@ -19,7 +19,7 @@ const routeTeacher = require('./routes/teacher');
 
 routeClient(app);
 routeAdmin(app);
-app.use('/api/teacher', routeTeacher);
+routeTeacher(app);
 
 app.listen(port, () => {
   console.log(`Connected successfully on port ${port}`)

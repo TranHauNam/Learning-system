@@ -5,7 +5,6 @@ module.exports.authenticate = async (req, res, next) => {
     try {
         if (!req.headers.authorization || !req.headers.authorization.startsWith('Bearer ')) {
             return res.status(401).json({
-                code: 401,
                 message: 'Không tìm thấy token xác thực'
             });
         }
@@ -31,7 +30,6 @@ module.exports.authenticate = async (req, res, next) => {
     } catch (error) {
         console.error('Lỗi xác thực:', error);
         return res.status(401).json({
-            code: 401,
             message: 'Xác thực không thành công'
         });
     }
