@@ -2,7 +2,6 @@ const mongoose = require('mongoose');
 
 const adminAccountSchema = new mongoose.Schema(
     {
-        fullName: String,
         email: {
             type: String,
             required: true,
@@ -11,25 +10,32 @@ const adminAccountSchema = new mongoose.Schema(
         password: {
             type: String,
             required: true
-        }, 
-        token: {
-            type: String
         },
+        fullName: String,
         phone: String,
         avatar: String,
-        role: String,
-        status: String,
+        role: {
+            type: String,
+            enum: ['admin', 'super_admin'],
+            default: 'admin'
+        },
+        status: {
+            type: String,
+            enum: ['active', 'inactive'],
+            default: 'active'
+        },
+        token: String,
         deleted: {
             type: Boolean,
             default: false
         },
-        deleteAt: Date,
+        deletedAt: Date
     },
     {
         timestamps: true
     }
 );
 
-const AdminAccount = mongoose.model("AdminAccount", adminAccountSchema, 'admin-accounts');
+const AdminAccount = mongoose.model('AdminAccount', adminAccountSchema, 'admin-accounts');
 
-module.exports = AdminAccount
+module.exports = AdminAccount;

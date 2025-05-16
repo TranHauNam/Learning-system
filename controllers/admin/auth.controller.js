@@ -6,8 +6,7 @@ module.exports.login = async (req, res) => {
     const {email, password} = req.body;
 
     const adminAccount = await AdminAccount.findOne({
-        email: email,
-        deleted: false
+        email: email
     });
 
     try {

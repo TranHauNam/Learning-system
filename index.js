@@ -13,11 +13,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Router
-const routeClient = require('./routes/client/index.route');
 const routeAdmin = require('./routes/admin/index.route');
-const routeTeacher = require('./routes/teacher');
+const routeTeacher = require('./routes/teacher/index.route');
 
-routeClient(app);
 routeAdmin(app);
 routeTeacher(app);
 

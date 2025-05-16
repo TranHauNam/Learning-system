@@ -215,7 +215,7 @@ module.exports.completeTeacherProfile = async (req, res) => {
         });
     } catch (error) {
         console.error("Lỗi cập nhật thông tin", error);
-        res.status(500).json({ message: "Lỗi máy chủ!" });
+        return res.status(500).json({ message: "Lỗi máy chủ!" });
     }
 };
 
