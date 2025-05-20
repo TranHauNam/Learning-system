@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const TeacherAccount = require('../models/teacher-account.model');
+const TeacherAccount = require('../models/teacher.model');
 
 module.exports.authenticate = async (req, res, next) => {
     try {

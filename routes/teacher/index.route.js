@@ -1,4 +1,4 @@
-const authRoutes = require('./auth.route');
+const authRoutes = require('../common/auth.route');
 const profileRoutes = require('./profile.route');
 const courseRoutes = require('./course.route');
 

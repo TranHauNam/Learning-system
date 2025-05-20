@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const AdminAccount = require('../models/admin-account.model');
+const AdminAccount = require('../models/admin.model');
 
 // Xác thực admin bằng token
 module.exports.authenticate = async (req, res, next) => {

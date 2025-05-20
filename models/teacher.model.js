@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const teacherAccountSchema = new mongoose.Schema(
+const teacherSchema = new mongoose.Schema(
     {
         email: {
             type: String,
@@ -62,6 +62,6 @@ const teacherAccountSchema = new mongoose.Schema(
     }
 );
 
-const TeacherAccount = mongoose.model("TeacherAccount", teacherAccountSchema, 'teacher-accounts');
+const Teacher = mongoose.model("Teacher", teacherSchema, 'teachers');
 
-module.exports = TeacherAccount; 
+module.exports = Teacher; 

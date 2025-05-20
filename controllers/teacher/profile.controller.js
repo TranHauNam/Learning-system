@@ -1,4 +1,4 @@
-const TeacherAccount = require('../../models/teacher-account.model');
+const TeacherAccount = require('../../models/teacher.model');
 
 // Cập nhật thông tin cá nhân cơ bản
 module.exports.updateProfile = async (req, res) => {

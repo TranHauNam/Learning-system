@@ -1,18 +1,32 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const TeacherAccount = require('../../models/teacher-account.model');
+const Student = require('../../models/student.model');
+const Teacher = require('../../models/teacher.model');
 const OTP = require('../../models/otp.model');
 const generateOtp = require('../../utils/generateOtp');
 const sendMail = require('../../utils/sendMail');
 
-// Bước 1: Nhập email, password rồi gửi OTP
+// Đăng ký
 module.exports.register = async (req, res) => {
     try {
-        const { email, password, reenterPassword } = req.body;
+        const { email, password, reenterPassword, role } = req.body;
+
+        // Kiểm tra role hợp lệ
+        if (!['student', 'teacher'].includes(role)) {
+            return res.status(400).json({
+                message: 'Role không hợp lệ'
+            });
+        }
 
         // Kiểm tra email đã tồn tại chưa
-        const existingTeacher = await TeacherAccount.findOne({ email });
-        if (existingTeacher) {
+        let existingUser;
+        if (role === 'student') {
+            existingUser = await Student.findOne({ email });
+        } else {
+            existingUser = await Teacher.findOne({ email });
+        }
+
+        if (existingUser) {
             return res.status(400).json({
                 message: 'Email đã được sử dụng'
             });
@@ -25,7 +39,7 @@ module.exports.register = async (req, res) => {
         }
 
         // Mã hóa mật khẩu
-        const salt = await bcrypt.genSalt(10);
+        const salt = await bcrypt.genSalt(12);
         const hashedPassword = await bcrypt.hash(password, salt);
 
         const otp = generateOtp();
@@ -36,6 +50,7 @@ module.exports.register = async (req, res) => {
                 email, 
                 otp, 
                 password: hashedPassword,
+                role
             },
             { upsert: true }
         );
@@ -53,10 +68,9 @@ module.exports.register = async (req, res) => {
     }
 };
 
-// Bước 2: Xác thực OTP
+// Xác thực OTP
 module.exports.verifyOtp = async (req, res) => {
     try {
-
         const { otp } = req.body;
     
         if (!otp) {
@@ -72,19 +86,41 @@ module.exports.verifyOtp = async (req, res) => {
                 message: 'Mã OTP không chính xác hoặc đã hết hạn' 
             });
         }
-        
-        // Tạo token tạm thời để xác nhận OTP hợp lệ (không tạo tài khoản)
-        const tempToken = jwt.sign(
-            { email: otpStore.email, password: otpStore.password }, 
-            process.env.JWT_SECRET, 
-            { expiresIn: "1h" }
-        );
-        
-        return res.status(200).json({
-            message: "Xác thực OTP thành công",
-            data: {
+
+        // Tạo tài khoản mới dựa vào role
+        let newUser;
+        if (otpStore.role === 'student') {
+            newUser = new Student({
                 email: otpStore.email,
-                tempToken
+                password: otpStore.password
+            });
+        } else {
+            newUser = new Teacher({
+                email: otpStore.email,
+                password: otpStore.password
+            });
+        }
+
+        // Tạo token đăng nhập
+        const token = jwt.sign(
+            { id: newUser._id, email: newUser.email, role: otpStore.role }, 
+            process.env.JWT_SECRET, 
+            { expiresIn: "7d" }
+        );
+
+        newUser.token = token;
+        await newUser.save();
+
+        // Xóa OTP sau khi đã tạo tài khoản
+        await OTP.deleteOne({ email: newUser.email });
+
+        return res.status(201).json({
+            message: `Tạo tài khoản ${otpStore.role} thành công`,
+            data: {
+                id: newUser._id,
+                email: newUser.email,
+                role: otpStore.role,
+                token
             }
         });
     } catch (error) {
@@ -95,89 +131,13 @@ module.exports.verifyOtp = async (req, res) => {
     }
 };
 
-// Bước 3: Chọn loại tài khoản và tạo tài khoản
-module.exports.createAccount = async (req, res) => {
+// Cập nhật thông tin cá nhân
+module.exports.completeProfile = async (req, res) => {
     try {
-        const { tempToken, accountType } = req.body;
-
-        // Kiểm tra token tạm thời
-        const decoded = jwt.verify(tempToken, process.env.JWT_SECRET);
-        
-        if (!decoded.email) {
-            return res.status(401).json({ 
-                message: 'Token không hợp lệ' 
-            });
-        }
-
-        // Kiểm tra loại tài khoản
-        if (accountType !== 'teacher' && accountType !== 'student') {
-            return res.status(400).json({ 
-                message: 'Loại tài khoản không hợp lệ' 
-            });
-        }
-
-        // Tìm thông tin OTP
-        const otpStore = await OTP.findOne({ email: decoded.email });
-        if (!otpStore) {
-            return res.status(404).json({ 
-                message: 'Không tìm thấy thông tin đăng ký' 
-            });
-        }
-
-        // Tạo tài khoản theo loại
-        if (accountType === 'teacher') {
-            // Tạo tài khoản giáo viên
-            const newTeacher = new TeacherAccount({
-                email: decoded.email,
-                password: decoded.password
-            });
-
-            // Tạo token đăng nhập
-            const token = jwt.sign(
-                { id: newTeacher._id, email: newTeacher.email }, 
-                process.env.JWT_SECRET, 
-                { expiresIn: "7d" }
-            );
-
-            newTeacher.token = token;
-            await newTeacher.save();
-
-            // Xóa OTP sau khi đã tạo tài khoản
-            await OTP.deleteOne({ email: decoded.email });
-
-            return res.status(201).json({
-                message: "Tạo tài khoản giáo viên thành công",
-                data: {
-                    id: newTeacher._id,
-                    email: newTeacher.email,
-                    token,
-                    accountType: 'teacher'
-                }
-            });
-        } else {
-            // Tạo tài khoản học sinh 
-            return res.status(501).json({
-                message: "Chức năng tạo tài khoản học sinh đang được phát triển"
-            });
-        }
-    } catch (error) {
-        console.error("Lỗi tạo tài khoản", error);
-        if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
-            return res.status(401).json({
-                message: 'Token không hợp lệ hoặc đã hết hạn'
-            });
-        }
-        return res.status(500).json({
-            message: "Lỗi máy chủ!"
-        });
-    }
-};
-
-// Bước 4: Bổ sung thông tin cá nhân
-module.exports.completeTeacherProfile = async (req, res) => {
-    try {
-        const teacherId = req.teacher._id;
+        const userId = req.user.id;
+        const role = req.user.role;
         const {
+            accountType,
             province,
             ward,
             school,
@@ -188,24 +148,44 @@ module.exports.completeTeacherProfile = async (req, res) => {
             birthday,
         } = req.body;
 
-        const updated = await TeacherAccount.findByIdAndUpdate(
-            teacherId,
-            {
-                province,
-                ward,
-                school,
-                surname,
-                middleName,
-                phone,
-                gender,
-                birthday,
-            },
-            { new: true }
-        ).select('-password');
+        let updated;
+        if (role === 'student') {
+            updated = await Student.findByIdAndUpdate(
+                userId,
+                {
+                    accountType,
+                    province,
+                    ward,
+                    school,
+                    surname,
+                    middleName,
+                    phone,
+                    gender,
+                    birthday
+                },
+                { new: true }
+            ).select('-password');
+        } else {
+            updated = await Teacher.findByIdAndUpdate(
+                userId,
+                {
+                    accountType,
+                    province,
+                    ward,
+                    school,
+                    surname,
+                    middleName,
+                    phone,
+                    gender,
+                    birthday
+                },
+                { new: true }
+            ).select('-password');
+        }
 
         if (!updated) {
             return res.status(404).json({
-                message: "Không tìm thấy tài khoản giáo viên"
+                message: "Không tìm thấy tài khoản"
             });
         }
 
@@ -224,38 +204,45 @@ module.exports.login = async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        // Kiểm tra email tồn tại
-        const teacher = await TeacherAccount.findOne({ email });
-        if (!teacher) {
+        // Tìm user trong cả hai model
+        const student = await Student.findOne({ email });
+        const teacher = await Teacher.findOne({ email });
+        const user = student || teacher;
+
+        if (!user) {
             return res.status(400).json({
                 message: 'Email hoặc mật khẩu không chính xác'
             });
         }
 
         // Kiểm tra mật khẩu
-        const isMatch = await bcrypt.compare(password, teacher.password);
+        const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             return res.status(400).json({
                 message: 'Mật khẩu không chính xác'
             });
         }
 
+        // Xác định role
+        const role = student ? 'student' : 'teacher';
+
         // Tạo token
         const token = jwt.sign(
-            { id: teacher._id, email: teacher.email },
+            { id: user._id, email: user.email, role },
             process.env.JWT_SECRET,
             { expiresIn: '7d' }
         );
 
         // Cập nhật token
-        teacher.token = token;
-        await teacher.save();
+        user.token = token;
+        await user.save();
 
         return res.status(200).json({
             message: 'Đăng nhập thành công',
             data: {
-                id: teacher._id,
-                email: teacher.email,
+                id: user._id,
+                email: user.email,
+                role,
                 token
             }
         });
@@ -272,9 +259,12 @@ module.exports.forgotPassword = async (req, res) => {
     try {
         const { email } = req.body;
 
-        // Kiểm tra email tồn tại
-        const teacher = await TeacherAccount.findOne({ email });
-        if (!teacher) {
+        // Kiểm tra email tồn tại trong cả hai model
+        const student = await Student.findOne({ email });
+        const teacher = await Teacher.findOne({ email });
+        const user = student || teacher;
+
+        if (!user) {
             return res.status(404).json({
                 message: 'Email không tồn tại trong hệ thống'
             });
@@ -287,7 +277,7 @@ module.exports.forgotPassword = async (req, res) => {
             { email },
             { 
                 email, 
-                otp, 
+                otp
             },
             { upsert: true }
         );
@@ -295,16 +285,11 @@ module.exports.forgotPassword = async (req, res) => {
         await sendMail(email, 'Mã OTP xác thực', `<p>Mã OTP của bạn là: <b>${otp}</b></p>`);
 
         return res.status(200).json({
-            message: 'Mã OTP đã được gửi vào email của bạn',
-            data: {
-                email,
-                otp
-            }
+            message: 'Mã OTP đã được gửi vào email của bạn'
         });
     } catch (error) {
         console.error('Lỗi quên mật khẩu:', error);
         return res.status(500).json({
-            code: 500,
             message: 'Lỗi máy chủ'
         });
     }
@@ -317,7 +302,6 @@ module.exports.verifyResetPasswordOtp = async (req, res) => {
 
         if (!otp) {
             return res.status(400).json({
-                code: 400,
                 message: 'Vui lòng cung cấp mã OTP'
             });
         }
@@ -339,7 +323,6 @@ module.exports.verifyResetPasswordOtp = async (req, res) => {
         );
 
         return res.status(200).json({
-            code: 200,
             message: 'Xác thực OTP thành công',
             data: {
                 email: otpStore.email,
@@ -349,7 +332,6 @@ module.exports.verifyResetPasswordOtp = async (req, res) => {
     } catch (error) {
         console.error('Lỗi xác thực OTP đặt lại mật khẩu:', error);
         return res.status(500).json({
-            code: 500,
             message: 'Lỗi máy chủ'
         });
     }
@@ -374,27 +356,29 @@ module.exports.resetPassword = async (req, res) => {
             });
         }
 
-        // Tìm giáo viên bằng email từ token
-        const teacher = await TeacherAccount.findOne({ email: decoded.email });
-        if (!teacher) {
+        // Tìm user trong cả hai model
+        const student = await Student.findOne({ email: decoded.email });
+        const teacher = await Teacher.findOne({ email: decoded.email });
+        const user = student || teacher;
+
+        if (!user) {
             return res.status(404).json({
-                message: 'Không tìm thấy tài khoản giáo viên'
+                message: 'Không tìm thấy tài khoản'
             });
         }
 
         // Mã hóa mật khẩu mới
-        const salt = await bcrypt.genSalt(10);
+        const salt = await bcrypt.genSalt(12);
         const hashedPassword = await bcrypt.hash(newPassword, salt);
 
         // Cập nhật mật khẩu
-        teacher.password = hashedPassword;
-        await teacher.save();
+        user.password = hashedPassword;
+        await user.save();
 
         // Xóa OTP đã sử dụng
         await OTP.deleteOne({ email: decoded.email });
 
         return res.status(200).json({
-            code: 200,
             message: 'Đặt lại mật khẩu thành công'
         });
     } catch (error) {
@@ -414,7 +398,8 @@ module.exports.resetPassword = async (req, res) => {
 module.exports.changePassword = async (req, res) => {
     try {
         const { currentPassword, newPassword, reenterNewPassword } = req.body;
-        const teacherId = req.teacher.id;
+        const userId = req.user.id;
+        const role = req.user.role;
 
         if (newPassword !== reenterNewPassword) {
             return res.status(400).json({
@@ -422,16 +407,22 @@ module.exports.changePassword = async (req, res) => {
             })
         }
 
-        // Tìm giáo viên trong database
-        const teacher = await TeacherAccount.findById(teacherId);
-        if (!teacher) {
+        // Tìm user trong model tương ứng
+        let user;
+        if (role === 'student') {
+            user = await Student.findById(userId);
+        } else {
+            user = await Teacher.findById(userId);
+        }
+
+        if (!user) {
             return res.status(404).json({
-                message: 'Không tìm thấy tài khoản giáo viên'
+                message: 'Không tìm thấy tài khoản'
             });
         }
 
         // Kiểm tra mật khẩu hiện tại
-        const isMatch = await bcrypt.compare(currentPassword, teacher.password);
+        const isMatch = await bcrypt.compare(currentPassword, user.password);
         if (!isMatch) {
             return res.status(400).json({
                 message: 'Mật khẩu hiện tại không chính xác'
@@ -439,21 +430,19 @@ module.exports.changePassword = async (req, res) => {
         }
 
         // Mã hóa mật khẩu mới
-        const salt = await bcrypt.genSalt(10);
+        const salt = await bcrypt.genSalt(12);
         const hashedPassword = await bcrypt.hash(newPassword, salt);
 
         // Cập nhật mật khẩu
-        teacher.password = hashedPassword;
-        await teacher.save();
+        user.password = hashedPassword;
+        await user.save();
 
         return res.status(200).json({
-            code: 200,
             message: 'Đổi mật khẩu thành công'
         });
     } catch (error) {
         console.error('Lỗi đổi mật khẩu:', error);
         return res.status(500).json({
-            code: 500,
             message: 'Lỗi máy chủ'
         });
     }
@@ -462,20 +451,23 @@ module.exports.changePassword = async (req, res) => {
 // Đăng xuất
 module.exports.logout = async (req, res) => {
     try {
-        const teacherId = req.teacher.id;
+        const userId = req.user.id;
+        const role = req.user.role;
 
-        // Xóa token
-        await TeacherAccount.findByIdAndUpdate(teacherId, { token: undefined });
+        // Xóa token trong model tương ứng
+        if (role === 'student') {
+            await Student.findByIdAndUpdate(userId, { token: undefined });
+        } else {
+            await Teacher.findByIdAndUpdate(userId, { token: undefined });
+        }
 
         return res.status(200).json({
-            code: 200,
             message: 'Đăng xuất thành công'
         });
     } catch (error) {
         console.error('Lỗi đăng xuất:', error);
         return res.status(500).json({
-            code: 500,
             message: 'Lỗi máy chủ'
         });
     }
-};
+}; 
