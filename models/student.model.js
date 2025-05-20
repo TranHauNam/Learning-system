@@ -30,6 +30,11 @@ const studentSchema = new mongoose.Schema(
         className: String,
         avatar: String,
         token: String,
+        purchasedCourses: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Course',
+            default: []
+        }],
         deleted: {
             type: Boolean,
             default: false

@@ -137,7 +137,6 @@ module.exports.completeProfile = async (req, res) => {
         const userId = req.user.id;
         const role = req.user.role;
         const {
-            accountType,
             province,
             ward,
             school,
@@ -153,7 +152,6 @@ module.exports.completeProfile = async (req, res) => {
             updated = await Student.findByIdAndUpdate(
                 userId,
                 {
-                    accountType,
                     province,
                     ward,
                     school,
@@ -169,7 +167,6 @@ module.exports.completeProfile = async (req, res) => {
             updated = await Teacher.findByIdAndUpdate(
                 userId,
                 {
-                    accountType,
                     province,
                     ward,
                     school,
