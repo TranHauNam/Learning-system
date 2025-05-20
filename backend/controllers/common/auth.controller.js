@@ -48,17 +48,23 @@ module.exports.register = async (req, res) => {
             { email },
             { 
                 email, 
-                otp, 
+                otp: otp, 
                 password: hashedPassword,
-                role
+                role: role
             },
             { upsert: true }
         );
         
-        await sendMail(email, 'Mã OTP xác thực', `<p>Mã OTP của bạn là: <b>${otp}</b></p>`);
+        try {
+            await sendMail(email, 'Mã OTP xác thực', `<p>Mã OTP của bạn là: <b>${otp}</b></p>`);
+        } catch (err) {
+            console.error('Lỗi gửi mail:', err);
+            return res.status(500).json({ message: 'Lỗi gửi mail' });
+        }
 
         return res.status(200).json({
-            message: "Gửi mã OTP thành công"
+            message: "Gửi mã OTP thành công",
+            otp
         });
     } catch (error) {
         console.error('Lỗi gửi otp', error);

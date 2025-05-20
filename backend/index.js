@@ -1,5 +1,7 @@
 const express = require('express')
+const cors = require('cors');
 const app = express();
+
 // env
 require('dotenv').config();
 const port = process.env.PORT;
@@ -11,6 +13,11 @@ database.connect();
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cors({
+  origin: 'http://localhost:3000', // hoặc '*', nhưng không khuyến khích
+  credentials: true // nếu dùng cookie/token
+}));
+
 
 // Router
 const routeAdmin = require('./routes/admin/index.route');
