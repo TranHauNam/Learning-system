@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { authService } from '../../services/auth.service';
 import './auth.css';
 import welcomeImg from '../../assets/flat-university-concept-background.png';
+import { USER_ROLES, ROUTES } from '../../constants/config';
 
 const LoginForm = () => {
   const navigate = useNavigate();
@@ -27,11 +28,15 @@ const LoginForm = () => {
 
     try {
       const response = await authService.login(formData.email, formData.password);
-      if (response.data && response.data.role) {
-        if (response.data.role === 'student') {
-          navigate('/student/dashboard');
+      const userData = response.data;
+      
+      if (userData && userData.token && userData.role) {
+        if (userData.role === USER_ROLES.STUDENT) {
+          navigate(ROUTES.STUDENT_DASHBOARD);
+        } else if (userData.role === USER_ROLES.TEACHER) {
+          navigate(ROUTES.TEACHER_DASHBOARD);
         } else {
-          navigate('/teacher/dashboard');
+          setError('Vai trò người dùng không hợp lệ');
         }
       } else {
         setError('Dữ liệu phản hồi không hợp lệ');

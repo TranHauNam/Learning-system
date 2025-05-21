@@ -5,5 +5,6 @@ const middleware = require('../../middlewares/teacher.middleware');
 
 router.put('/', middleware.authenticate, controller.updateProfile);
 router.put('/address', middleware.authenticate, controller.updateAddress);
+router.get('/', middleware.authenticate, controller.getProfile);
 
 module.exports = router;

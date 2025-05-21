@@ -2,6 +2,8 @@ import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from '../pages/auth/LoginPage';
 import RegisterPage from '../pages/auth/RegisterPage';
+import { ROUTES } from '../constants/config';
+import TeacherDashboardPage from '../pages/TeacherDashboardPage';
 
 const AppRoutes = () => {
   return (
@@ -12,6 +14,8 @@ const AppRoutes = () => {
       
       {/* Redirect to login if no route matches */}
       <Route path="*" element={<Navigate to="/login" replace />} />
+
+      <Route path={ROUTES.TEACHER_DASHBOARD} element={<TeacherDashboardPage />} />
     </Routes>
   );
 };

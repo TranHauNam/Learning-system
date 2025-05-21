@@ -1,5 +1,31 @@
 const TeacherAccount = require('../../models/teacher.model');
 
+// Lấy thông tin cá nhân
+module.exports.getProfile = async (req, res) => {
+    try {
+        const teacherId = req.teacher._id;
+
+        const teacher = await TeacherAccount.findById(teacherId)
+            .select('-password -token'); // Loại bỏ các trường nhạy cảm
+
+        if (!teacher) {
+            return res.status(404).json({
+                message: 'Không tìm thấy thông tin giáo viên'
+            });
+        }
+
+        return res.status(200).json({
+            message: 'Lấy thông tin cá nhân thành công',
+            data: teacher
+        });
+    } catch (error) {
+        console.error('Lỗi lấy thông tin cá nhân:', error);
+        return res.status(500).json({
+            message: 'Lỗi máy chủ'
+        });
+    }
+};
+
 // Cập nhật thông tin cá nhân cơ bản
 module.exports.updateProfile = async (req, res) => {
     try {
