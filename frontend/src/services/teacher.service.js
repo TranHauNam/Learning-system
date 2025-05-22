@@ -129,6 +129,16 @@ const addLecture = async (courseId, lectureData) => {
   }
 };
 
+const getCategories = async () => {
+  try {
+    const response = await axiosInstance.get('/categories');
+    return response.data;
+  } catch (error) {
+    console.error('Get Categories Error:', error);
+    throw error;
+  }
+};
+
 export const teacherService = {
   getTeacherProfile,
   updateProfile,
@@ -138,5 +148,6 @@ export const teacherService = {
   getCourse,
   updateCourse,
   deleteCourse,
-  addLecture
+  addLecture,
+  getCategories
 }; 
