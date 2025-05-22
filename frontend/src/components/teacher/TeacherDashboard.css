@@ -1,72 +1,44 @@
+/* Header đã có file riêng, chỉ cần đảm bảo header fixed hoặc sticky */
+
 .teacher-dashboard {
-  display: flex;
-  min-height: 100vh;
-  background: #f5f7fa;
-}
-
-.sidebar {
-  width: 250px;
-  background: white;
-  padding: 2rem 0;
-  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
-}
-
-.sidebar-header {
-  padding: 0 1.5rem 2rem;
-  border-bottom: 1px solid #eee;
-}
-
-.sidebar-title {
-  color: #25507a;
-  font-size: 1.5rem;
-  font-weight: 600;
+  width: 100vw;
+  max-width: 100vw;
   margin: 0;
-}
-
-.sidebar-nav {
-  padding: 1.5rem 0;
-}
-
-.nav-item {
-  padding: 0.75rem 1.5rem;
+  padding: 0;
   display: flex;
-  align-items: center;
-  color: #666;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  border-left: 3px solid transparent;
+  flex-direction: row;
+  background: #f6fafd;
+  min-height: 100vh;
+  padding-top: 56px; /* chiều cao header */
 }
 
-.nav-item:hover {
-  background: #f8f9fa;
-  color: #25507a;
-}
-
-.nav-item.active {
-  background: #f0f7ff;
-  color: #25507a;
-  border-left-color: #25507a;
-}
-
-.nav-icon {
-  margin-right: 0.75rem;
-  width: 20px;
-  height: 20px;
+.dashboard-main {
+  flex: 1;
+  padding: 2.5rem 2rem 2rem 2rem;
+  margin-left: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .dashboard-content {
-  flex: 1;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
   padding: 2rem;
-  background: #f5f7fa;
+  min-height: 80vh;
 }
 
-.content-header {
-  margin-bottom: 2rem;
+/* Responsive */
+@media (max-width: 900px) {
+  .teacher-dashboard {
+    flex-direction: column;
+    padding-top: 56px;
+  }
+  .dashboard-main {
+    padding: 1rem;
+  }
+  .dashboard-content {
+    padding: 1rem;
+  }
 }
-
-.content-title {
-  color: #25507a;
-  font-size: 1.75rem;
-  font-weight: 600;
-  margin: 0;
-} 

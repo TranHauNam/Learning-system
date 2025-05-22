@@ -1,55 +1,103 @@
 .header {
-  background: white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  padding: 1rem 2rem;
+  background: #f3f6ff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  padding: 0;
   position: fixed;
   top: 0;
-  left: 250px; /* Chiều rộng của sidebar */
+  left: 0;
   right: 0;
-  z-index: 100;
-}
-
-.header-content {
+  z-index: 1000;
+  height: 56px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
 }
 
-.header-title {
-  font-size: 1.5rem;
-  font-weight: 600;
+.header-content {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+  height: 56px;
+}
+
+.header-logo {
+  display: flex;
+  align-items: center;
+  margin-right: 1.5rem;
+  
+}
+
+.logo-circle {
+  width: 40px;
+  height: 40px;
+  background: #4a90e2;
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.7rem;
+  font-weight: bold;
+  box-shadow: 0 2px 8px rgba(74, 144, 226, 0.08);
+}
+
+.header-menu-icons {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  flex: 1;
+  justify-content: center;
+  
+}
+
+.menu-icon {
+  font-size: 1.35rem;
   color: #25507a;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.menu-icon:hover {
+  color: #4a90e2;
 }
 
 .header-right {
   position: relative;
+  display: flex;
+  align-items: center;
 }
 
 .avatar-container {
   cursor: pointer;
-  padding: 0.5rem;
+  padding: 0.15rem;
   border-radius: 50%;
-  transition: background-color 0.3s;
+  background: #eaf1fb;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+  margin-top: 1rem;
 }
-
 .avatar-container:hover {
-  background-color: #f0f7ff;
+  background: #d2e6fa;
 }
 
 .avatar-icon {
-  width: 2rem;
-  height: 2rem;
+  width: 1.5rem;
+  height: 1.5rem;
   color: #25507a;
 }
 
 .dropdown-menu {
   position: absolute;
-  top: 100%;
+  top: 110%;
   right: 0;
   margin-top: 0.5rem;
   background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
   min-width: 180px;
   padding: 0.5rem 0;
 }
@@ -66,8 +114,7 @@
   cursor: pointer;
   transition: background-color 0.3s;
 }
-
 .dropdown-item:hover {
-  background-color: #f0f7ff;
+  background-color: #eaf1fb;
   color: #25507a;
 } 

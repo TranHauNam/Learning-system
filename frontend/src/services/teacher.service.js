@@ -79,9 +79,64 @@ const addCourse = async (courseData) => {
   }
 };
 
+const getCourses = async (params) => {
+  try {
+    const response = await axiosInstance.get('/courses', { params });
+    return { data: response.data.data };
+  } catch (error) {
+    console.error('Get Courses Error:', error);
+    throw error;
+  }
+};
+
+const getCourse = async (id) => {
+  try {
+    const response = await axiosInstance.get(`/courses/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Get Course Error:', error);
+    throw error;
+  }
+};
+
+const updateCourse = async (id, updateData) => {
+  try {
+    const response = await axiosInstance.patch(`/courses/${id}`, updateData);
+    return response.data;
+  } catch (error) {
+    console.error('Update Course Error:', error);
+    throw error;
+  }
+};
+
+const deleteCourse = async (id) => {
+  try {
+    const response = await axiosInstance.delete(`/courses/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Delete Course Error:', error);
+    throw error;
+  }
+};
+
+const addLecture = async (courseId, lectureData) => {
+  try {
+    const response = await axiosInstance.post(`/courses/${courseId}/lectures`, lectureData);
+    return response.data;
+  } catch (error) {
+    console.error('Add Lecture Error:', error);
+    throw error;
+  }
+};
+
 export const teacherService = {
   getTeacherProfile,
   updateProfile,
   updateAddress,
-  addCourse
+  addCourse,
+  getCourses,
+  getCourse,
+  updateCourse,
+  deleteCourse,
+  addLecture
 }; 

@@ -1,13 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { teacherService } from '../../services/teacher.service';
 import './TeacherProfileForm.css';
+import { AlertContext } from '../common/alertContext.jsx';
 
 const TeacherProfileForm = () => {
   const [activeTab, setActiveTab] = useState('info');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-  
   const [profileData, setProfileData] = useState({
     surname: '',
     middleName: '',
@@ -15,12 +14,12 @@ const TeacherProfileForm = () => {
     birthday: '',
     avatar: ''
   });
-
   const [addressData, setAddressData] = useState({
     province: '',
     ward: '',
     schoold: ''
   });
+  const { showAlert } = useContext(AlertContext);
 
   useEffect(() => {
     loadTeacherProfile();
@@ -29,12 +28,15 @@ const TeacherProfileForm = () => {
   const loadTeacherProfile = async () => {
     try {
       const response = await teacherService.getTeacherProfile();
-      if (response.data) {
-        const { province, ward, school, ...profileInfo } = response.data;
-        setProfileData(profileInfo);
-        setAddressData({ province, ward, school });
+    if (response.data) {
+      const { province, ward, school, birthday, ...profileInfo } = response.data;
+      setProfileData({
+        ...profileInfo,
+        birthday: birthday ? new Date(birthday).toISOString().slice(0, 10) : ''
+      });
+      setAddressData({ province, ward, school });
       }
-    } catch (err) {
+    } catch {
       setError('Không thể tải thông tin hồ sơ');
     }
   };
@@ -44,6 +46,20 @@ const TeacherProfileForm = () => {
       ...profileData,
       [e.target.name]: e.target.value
     });
+  };
+
+  const handleAvatarUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfileData({
+          ...profileData,
+          avatar: reader.result // base64
+        });
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleAddressChange = (e) => {
@@ -57,12 +73,15 @@ const TeacherProfileForm = () => {
     e.preventDefault();
     setLoading(true);
     setError('');
-    setSuccess('');
 
     try {
       await teacherService.updateProfile(profileData);
-      setSuccess('Cập nhật thông tin cá nhân thành công!');
-    } catch (err) {
+      showAlert('Cập nhật thành công!');
+      if (profileData.avatar) {
+        localStorage.setItem('teacherAvatar', profileData.avatar);
+        window.dispatchEvent(new StorageEvent('storage', { key: 'teacherAvatar', newValue: profileData.avatar }));
+      }
+    } catch {
       setError('Không thể cập nhật thông tin cá nhân');
     } finally {
       setLoading(false);
@@ -73,12 +92,11 @@ const TeacherProfileForm = () => {
     e.preventDefault();
     setLoading(true);
     setError('');
-    setSuccess('');
 
     try {
       await teacherService.updateAddress(addressData);
-      setSuccess('Cập nhật địa chỉ thành công!');
-    } catch (err) {
+      showAlert('Cập nhật địa chỉ thành công!');
+    } catch {
       setError('Không thể cập nhật địa chỉ');
     } finally {
       setLoading(false);
@@ -92,18 +110,17 @@ const TeacherProfileForm = () => {
           className={`tab-button ${activeTab === 'info' ? 'active' : ''}`}
           onClick={() => setActiveTab('info')}
         >
-          Thông tin cá nhân
+            Thông tin cơ bản
         </button>
         <button
           className={`tab-button ${activeTab === 'address' ? 'active' : ''}`}
           onClick={() => setActiveTab('address')}
         >
-          Địa chỉ
+          Địa chỉ công tác
         </button>
       </div>
 
       {error && <div className="error-message">{error}</div>}
-      {success && <div className="success-message">{success}</div>}
 
       {activeTab === 'info' ? (
         <form className="profile-form" onSubmit={handleProfileSubmit}>
@@ -118,7 +135,7 @@ const TeacherProfileForm = () => {
             />
           </div>
           <div className="form-group">
-            <label>Tên đệm</label>
+            <label>Tên</label>
             <input
               type="text"
               name="middleName"
@@ -151,7 +168,7 @@ const TeacherProfileForm = () => {
             />
           </div>
           <div className="form-group">
-            <label>Ảnh đại diện (URL)</label>
+            <label>Ảnh đại diện (URL hoặc upload)</label>
             <input
               type="text"
               name="avatar"
@@ -159,6 +176,21 @@ const TeacherProfileForm = () => {
               onChange={handleProfileChange}
               placeholder="Dán link ảnh hoặc upload"
             />
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleAvatarUpload}
+              style={{ marginTop: '8px' }}
+            />
+            {profileData.avatar && (
+              <div style={{ marginTop: '12px', textAlign: 'center' }}>
+                <img
+                  src={profileData.avatar}
+                  alt="Avatar preview"
+                  style={{ width: 80, height: 80, borderRadius: '50%', objectFit: 'cover', border: '1.5px solid #e0e7ef' }}
+                />
+              </div>
+            )}
           </div>
           <button type="submit" className="submit-button" disabled={loading}>
             {loading ? 'Đang cập nhật...' : 'Cập nhật thông tin'}

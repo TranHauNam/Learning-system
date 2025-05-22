@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { FaUserCircle, FaHome, FaGraduationCap, FaBookOpen, FaRegIdBadge } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import { FaUserCircle } from 'react-icons/fa';
 import { authService } from '../../services/auth.service';
 import './Header.css';
 
@@ -8,6 +8,20 @@ const Header = ({ onProfileClick }) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
+  const [avatar, setAvatar] = useState(null);
+
+  useEffect(() => {
+    const storedAvatar = localStorage.getItem('teacherAvatar');
+    if (storedAvatar) setAvatar(storedAvatar);
+
+    const handleStorage = (event) => {
+      if (event.key === 'teacherAvatar') {
+        setAvatar(event.newValue);
+      }
+    };
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -15,7 +29,6 @@ const Header = ({ onProfileClick }) => {
         setShowDropdown(false);
       }
     };
-
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
@@ -32,13 +45,28 @@ const Header = ({ onProfileClick }) => {
   return (
     <div className="header">
       <div className="header-content">
-        <div className="header-title">Teacher Portal</div>
+        {/* Logo */}
+        <div className="header-logo">
+          <div className="logo-circle">M</div>
+        </div>
+        {/* Menu icons căn giữa */}
+        <div className="header-menu-icons">
+          <FaHome className="menu-icon" />
+          <FaGraduationCap className="menu-icon" />
+          <FaBookOpen className="menu-icon" />
+          <FaRegIdBadge className="menu-icon" />
+        </div>
+        {/* Avatar + Dropdown */}
         <div className="header-right" ref={dropdownRef}>
           <div 
             className="avatar-container" 
             onClick={() => setShowDropdown(!showDropdown)}
           >
-            <FaUserCircle className="avatar-icon" />
+            {avatar ? (
+              <img src={avatar} alt="avatar" className="avatar-icon" style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover' }} />
+            ) : (
+              <FaUserCircle className="avatar-icon" />
+            )}
           </div>
           {showDropdown && (
             <div className="dropdown-menu">
