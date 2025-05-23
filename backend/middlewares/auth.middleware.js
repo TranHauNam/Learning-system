@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
-const StudentAccount = require('../models/student.model');
-const TeacherAccount = require('../models/teacher.model');
+const Student = require('../models/student.model');
+const Teacher = require('../models/teacher.model');
 
 module.exports.authenticate = async (req, res, next) => {
     try {
@@ -25,9 +25,9 @@ module.exports.authenticate = async (req, res, next) => {
         // Tìm user trong model tương ứng
         let user;
         if (decoded.role === 'student') {
-            user = await StudentAccount.findById(decoded.id);
+            user = await Student.findById(decoded.id);
         } else if (decoded.role === 'teacher') {
-            user = await TeacherAccount.findById(decoded.id);
+            user = await Teacher.findById(decoded.id);
         }
 
         if (!user) {

@@ -3,51 +3,25 @@ const Teacher = require('../../models/teacher.model');
 const Cart = require('../../models/cart.model');
 const Student = require('../../models/student.model');
 const path = require('path');
+const { time } = require('console');
 
 // Tìm kiếm khóa học
 module.exports.searchCourses = async (req, res) => {
     try {
-        const { keyword, category, teacherId, page = 1, limit = 10 } = req.query;
-        
+        const { keyword } = req.query;
         const query = {};
-        
-        // Tìm kiếm theo từ khóa
+        // Tìm kiếm theo từ khóa (chỉ theo tên khóa học)
         if (keyword) {
-            query.$or = [
-                { title: { $regex: keyword, $options: 'i' } },
-                { description: { $regex: keyword, $options: 'i' } }
-            ];
-        }
-        
-        // Lọc theo danh mục
-        if (category) {
-            query.category = category;
-        }
-        
-        // Lọc theo giáo viên
-        if (teacherId) {
-            query.teacher = teacherId;
+            query.title = { $regex: keyword, $options: 'i' };
         }
 
         const courses = await Course.find(query)
             .populate('teacher', 'name email')
-            .skip((page - 1) * limit)
-            .limit(parseInt(limit))
             .sort({ createdAt: -1 });
-
-        const total = await Course.countDocuments(query);
 
         return res.status(200).json({
             message: 'Tìm kiếm khóa học thành công',
-            data: {
-                courses,
-                pagination: {
-                    page: parseInt(page),
-                    limit: parseInt(limit),
-                    total,
-                    totalPages: Math.ceil(total / limit)
-                }
-            }
+            data: courses
         });
     } catch (error) {
         console.error('Lỗi tìm kiếm khóa học:', error);
@@ -152,7 +126,7 @@ module.exports.getCourseDetail = async (req, res) => {
 module.exports.addToCart = async (req, res) => {
     try {
         const { courseId } = req.body;
-        const studentId = req.user.id;
+        const studentId = req.student.id;
 
         // Kiểm tra khóa học tồn tại
         const course = await Course.findById(courseId);
@@ -198,7 +172,7 @@ module.exports.addToCart = async (req, res) => {
 // Thanh toán giỏ hàng (mô phỏng)
 module.exports.checkoutCart = async (req, res) => {
     try {
-        const studentId = req.user.id;
+        const studentId = req.student.id;
 
         // Lấy giỏ hàng của học viên
         const cart = await Cart.findOne({ student: studentId });

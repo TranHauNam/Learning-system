@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const TeacherAccount = require('../models/teacher.model');
+const Teacher = require('../models/teacher.model');
 
 module.exports.authenticate = async (req, res, next) => {
     try {
@@ -18,7 +18,7 @@ module.exports.authenticate = async (req, res, next) => {
             });
         }
 
-        const teacher = await TeacherAccount.findById(decoded.id).select('-password');
+        const teacher = await Teacher.findById(decoded.id).select('-password');
         if (!teacher) {
             return res.status(404).json({
                 message: 'Giáo viên không tồn tại'

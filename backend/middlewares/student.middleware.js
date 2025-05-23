@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const StudentAccount = require('../models/student.model');
+const Student = require('../models/student.model');
 
 module.exports.authenticate = async (req, res, next) => {
     try {
@@ -14,9 +14,9 @@ module.exports.authenticate = async (req, res, next) => {
 
         // Xác thực token
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        
+
         // Tìm học sinh trong database
-        const student = await StudentAccount.findById(decoded.id);
+        const student = await Student.findById(decoded.id);
         
         if (!student) {
             return res.status(401).json({

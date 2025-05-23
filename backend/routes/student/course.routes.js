@@ -9,9 +9,6 @@ router.get('/search', controller.searchCourses);
 // Lọc và sắp xếp khóa học
 router.get('/filter', controller.filterAndSortCourses);
 
-// Xem chi tiết khóa học
-router.get('/:courseId', controller.getCourseDetail);
-
 // Thêm khóa học vào giỏ hàng (yêu cầu đăng nhập)
 router.post('/cart', middleware.authenticate, controller.addToCart);
 
@@ -19,5 +16,8 @@ router.post('/cart', middleware.authenticate, controller.addToCart);
 router.post('/checkout', middleware.authenticate, controller.checkoutCart);
 
 router.get('/:id/download', middleware.authenticate, controller.downloadFile);
+
+// Xem chi tiết khóa học
+router.get('/:courseId', controller.getCourseDetail);
 
 module.exports = router; 
