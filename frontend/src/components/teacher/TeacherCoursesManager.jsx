@@ -1,16 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { teacherService } from '../../services/teacher.service';
 import './TeacherCoursesManager.css';
+import { AlertContext } from '../common/alertContext.jsx';
 
 const emptyCourse = { title: '', description: '', category: '', price: '', thumbnail: '' };
-const emptyAssignment = { title: '', description: '', attachments: [''], dueDate: '' };
-const emptyLecture = { title: '', description: '', video: '', documents: [''], assignments: [ { ...emptyAssignment } ] };
+const emptyAssignment = { title: '', description: '', attachments: [], dueDate: '' };
+const emptyLecture = { title: '', description: '', video: null, documents: [], assignments: [ { ...emptyAssignment } ] };
 
 const TeacherCoursesManager = () => {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
   const [showLectureForm, setShowLectureForm] = useState(false);
@@ -20,6 +20,7 @@ const TeacherCoursesManager = () => {
   const [lecture, setLecture] = useState(emptyLecture);
   const [activeTab, setActiveTab] = useState('list'); // 'list' | 'add'
   const [categories, setCategories] = useState([]);
+  const { showAlert } = useContext(AlertContext);
 
   // Lấy danh sách khóa học
   const fetchCourses = async () => {
@@ -55,12 +56,11 @@ const TeacherCoursesManager = () => {
   // Thêm khóa học mới
   const handleAddCourse = async (e) => {
     e.preventDefault();
-    setError(''); setSuccess('');
+    setError('');
     try {
       await teacherService.addCourse(newCourse);
-      setShowAddForm(false);
       setNewCourse(emptyCourse);
-      setSuccess('Thêm khóa học thành công!');
+      showAlert('Thêm khóa học thành công!');
       fetchCourses();
     } catch {
       setError('Không thể thêm khóa học');
@@ -70,10 +70,10 @@ const TeacherCoursesManager = () => {
   // Xóa khóa học
   const handleDelete = async (id) => {
     if (!window.confirm('Bạn có chắc muốn xóa?')) return;
-    setError(''); setSuccess('');
+    setError('');
     try {
       await teacherService.deleteCourse(id);
-      setSuccess('Xóa khóa học thành công!');
+      showAlert('Xóa khóa học thành công!');
       fetchCourses();
     } catch {
       setError('Không thể xóa khóa học');
@@ -84,18 +84,18 @@ const TeacherCoursesManager = () => {
   const openEditForm = (course) => {
     setEditCourse(course);
     setShowEditForm(true);
-    setError(''); setSuccess('');
+    setError('');
   };
 
   // Cập nhật khóa học
   const handleEditCourse = async (e) => {
     e.preventDefault();
-    setError(''); setSuccess('');
+    setError('');
     try {
       await teacherService.updateCourse(editCourse._id, editCourse);
       setShowEditForm(false);
       setEditCourse(emptyCourse);
-      setSuccess('Cập nhật khóa học thành công!');
+      showAlert('Cập nhật khóa học thành công!');
       fetchCourses();
     } catch {
       setError('Không thể cập nhật khóa học');
@@ -107,58 +107,89 @@ const TeacherCoursesManager = () => {
     setSelectedCourse(course);
     setLecture(emptyLecture);
     setShowLectureForm(true);
-    setError(''); setSuccess('');
+    setError('');
   };
+
+  // Thêm hàm chuyển file sang base64
+  function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
 
   // Thêm bài giảng
   const handleAddLecture = async (e) => {
     e.preventDefault();
-    setError(''); setSuccess('');
+    setError('');
     try {
-      await teacherService.addLecture(selectedCourse._id, lecture);
+      // Xử lý base64 cho video và documents
+      let videoBase64 = null;
+      if (lecture.video) {
+        videoBase64 = await fileToBase64(lecture.video);
+      }
+      let documentsBase64 = [];
+      if (lecture.documents && lecture.documents.length > 0) {
+        documentsBase64 = await Promise.all(
+          lecture.documents.map(fileToBase64)
+        );
+      }
+      // Xử lý base64 cho attachments trong assignments
+      const assignments = await Promise.all(
+        lecture.assignments.map(async (a) => {
+          let attachmentsBase64 = [];
+          if (a.attachments && a.attachments.length > 0) {
+            attachmentsBase64 = await Promise.all(a.attachments.map(fileToBase64));
+          }
+          return {
+            ...a,
+            attachments: attachmentsBase64,
+          };
+        })
+      );
+      const payload = {
+        ...lecture,
+        video: videoBase64,
+        documents: documentsBase64,
+        assignments,
+      };
+      await teacherService.addLecture(selectedCourse._id, payload);
       setShowLectureForm(false);
       setLecture(emptyLecture);
-      setSuccess('Thêm bài giảng thành công!');
+      showAlert('Thêm bài giảng thành công!');
       fetchCourses();
     } catch {
       setError('Không thể thêm bài giảng');
     }
   };
 
-  // Thêm/xóa document
-  const handleDocumentChange = (idx, value) => {
-    const docs = [...lecture.documents];
-    docs[idx] = value;
-    setLecture({ ...lecture, documents: docs });
+  // Xử lý file video
+  const handleVideoChange = (e) => {
+    setLecture({ ...lecture, video: e.target.files[0] });
   };
-  const addDocument = () => setLecture({ ...lecture, documents: [...lecture.documents, ''] });
-  const removeDocument = (idx) => setLecture({ ...lecture, documents: lecture.documents.filter((_, i) => i !== idx) });
 
-  // Thêm/xóa assignment
+  // Xử lý file tài liệu
+  const handleDocumentsChange = (e) => {
+    setLecture({ ...lecture, documents: Array.from(e.target.files) });
+  };
+
+  // Xử lý file đính kèm cho assignment
+  const handleAttachmentsChange = (aIdx, e) => {
+    const assignments = [...lecture.assignments];
+    assignments[aIdx].attachments = Array.from(e.target.files);
+    setLecture({ ...lecture, assignments });
+  };
+
+  // Thêm lại các hàm cho assignment:
   const handleAssignmentChange = (idx, field, value) => {
     const assignments = [...lecture.assignments];
     assignments[idx][field] = value;
     setLecture({ ...lecture, assignments });
   };
-  const addAssignment = () => setLecture({ ...lecture, assignments: [...lecture.assignments, { ...emptyAssignment }] });
+  const addAssignment = () => setLecture({ ...lecture, assignments: [...lecture.assignments, { title: '', description: '', attachments: [], dueDate: '' }] });
   const removeAssignment = (idx) => setLecture({ ...lecture, assignments: lecture.assignments.filter((_, i) => i !== idx) });
-
-  // Thêm/xóa attachment cho assignment
-  const handleAttachmentChange = (aIdx, attIdx, value) => {
-    const assignments = [...lecture.assignments];
-    assignments[aIdx].attachments[attIdx] = value;
-    setLecture({ ...lecture, assignments });
-  };
-  const addAttachment = (aIdx) => {
-    const assignments = [...lecture.assignments];
-    assignments[aIdx].attachments.push('');
-    setLecture({ ...lecture, assignments });
-  };
-  const removeAttachment = (aIdx, attIdx) => {
-    const assignments = [...lecture.assignments];
-    assignments[aIdx].attachments = assignments[aIdx].attachments.filter((_, i) => i !== attIdx);
-    setLecture({ ...lecture, assignments });
-  };
 
   return (
     <div className="profile-container">
@@ -177,7 +208,6 @@ const TeacherCoursesManager = () => {
         </button>
       </div>
       {error && <div className="error-message">{error}</div>}
-      {success && <div className="success-message">{success}</div>}
       {loading ? (
         <p>Đang tải...</p>
       ) : activeTab === 'list' && (
@@ -310,7 +340,7 @@ const TeacherCoursesManager = () => {
               <h3>Thêm bài giảng cho: {selectedCourse?.title}</h3>
               <button className="modal-close" onClick={() => setShowLectureForm(false)}>×</button>
             </div>
-            <form className="profile-form" onSubmit={handleAddLecture}>
+            <form className="profile-form" onSubmit={handleAddLecture} encType="multipart/form-data">
               <div className="form-group">
                 <label>Tiêu đề bài giảng</label>
                 <input value={lecture.title} onChange={e => setLecture({ ...lecture, title: e.target.value })} required />
@@ -320,39 +350,38 @@ const TeacherCoursesManager = () => {
                 <textarea value={lecture.description} onChange={e => setLecture({ ...lecture, description: e.target.value })} required style={{ minHeight: 60 }} />
               </div>
               <div className="form-group">
-                <label>Video (URL)</label>
-                <input value={lecture.video} onChange={e => setLecture({ ...lecture, video: e.target.value })} />
+                <label>Video</label>
+                <input type="file" accept="video/*" onChange={handleVideoChange} />
+                {lecture.video && <span style={{ fontSize: 13, color: '#2563eb' }}>{lecture.video.name}</span>}
               </div>
               <div className="form-group">
-                <label>Tài liệu (có thể thêm nhiều link)</label>
-                {lecture.documents.map((doc, idx) => (
-                  <div key={idx} style={{ display: 'flex', gap: 8, marginBottom: 4 }}>
-                    <input value={doc} onChange={e => handleDocumentChange(idx, e.target.value)} style={{ flex: 1 }} />
-                    <button type="button" onClick={() => removeDocument(idx)} disabled={lecture.documents.length === 1}>-</button>
-                    <button type="button" onClick={addDocument}>+</button>
-                  </div>
-                ))}
+                <label>Tài liệu</label>
+                <input type="file" multiple onChange={handleDocumentsChange} />
+                {lecture.documents && lecture.documents.length > 0 && (
+                  <ul style={{ fontSize: 13, color: '#2563eb', margin: 0, paddingLeft: 18 }}>
+                    {lecture.documents.map((f, idx) => <li key={idx}>{f.name}</li>)}
+                  </ul>
+                )}
               </div>
               <div className="form-group">
                 <label>Bài tập</label>
                 {lecture.assignments.map((a, aIdx) => (
-                  <div key={aIdx} style={{ border: '1px solid #e0e7ef', borderRadius: 8, padding: 12, marginBottom: 8 }}>
+                  <div key={aIdx} className="lecture-assignment-box">
                     <input placeholder="Tiêu đề bài tập" value={a.title} onChange={e => handleAssignmentChange(aIdx, 'title', e.target.value)} style={{ marginBottom: 4, width: '100%' }} />
                     <textarea placeholder="Mô tả" value={a.description} onChange={e => handleAssignmentChange(aIdx, 'description', e.target.value)} style={{ marginBottom: 4, width: '100%' }} />
-                    <label>File đính kèm (nhiều link):</label>
-                    {a.attachments.map((att, attIdx) => (
-                      <div key={attIdx} style={{ display: 'flex', gap: 8, marginBottom: 4 }}>
-                        <input value={att} onChange={e => handleAttachmentChange(aIdx, attIdx, e.target.value)} style={{ flex: 1 }} />
-                        <button type="button" onClick={() => removeAttachment(aIdx, attIdx)} disabled={a.attachments.length === 1}>-</button>
-                        <button type="button" onClick={() => addAttachment(aIdx)}>+</button>
-                      </div>
-                    ))}
-                    <label>Hạn nộp:</label>
+                    <label>File đính kèm</label>
+                    <input type="file" multiple onChange={e => handleAttachmentsChange(aIdx, e)} />
+                    {a.attachments && a.attachments.length > 0 && (
+                      <ul style={{ fontSize: 13, color: '#2563eb', margin: 0, paddingLeft: 18 }}>
+                        {a.attachments.map((f, idx) => <li key={idx}>{f.name}</li>)}
+                      </ul>
+                    )}
+                    <label>Hạn nộp</label>
                     <input type="date" value={a.dueDate ? a.dueDate.slice(0,10) : ''} onChange={e => handleAssignmentChange(aIdx, 'dueDate', e.target.value)} />
-                    <button type="button" onClick={() => removeAssignment(aIdx)} disabled={lecture.assignments.length === 1} style={{ marginTop: 8, color: '#ef4444' }}>Xóa bài tập</button>
+                    <button type="button" onClick={() => removeAssignment(aIdx)} disabled={lecture.assignments.length === 1} className="remove-assignment-btn">Xóa bài tập</button>
                   </div>
                 ))}
-                <button type="button" onClick={addAssignment} style={{ marginTop: 8 }}>+ Thêm bài tập</button>
+                <button type="button" onClick={addAssignment} className="add-assignment-btn">+ Thêm bài tập</button>
               </div>
               <div className="form-actions">
                 <button type="submit" className="submit-button">Thêm</button>

@@ -168,14 +168,7 @@ const TeacherProfileForm = () => {
             />
           </div>
           <div className="form-group">
-            <label>Ảnh đại diện (URL hoặc upload)</label>
-            <input
-              type="text"
-              name="avatar"
-              value={profileData.avatar}
-              onChange={handleProfileChange}
-              placeholder="Dán link ảnh hoặc upload"
-            />
+            <label>Ảnh đại diện</label>
             <input
               type="file"
               accept="image/*"

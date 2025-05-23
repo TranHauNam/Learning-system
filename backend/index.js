@@ -11,13 +11,15 @@ const database = require('./config/database.config');
 database.connect();
 
 // Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(cors({
-  origin: 'http://localhost:3000', // hoặc '*', nhưng không khuyến khích
-  credentials: true // nếu dùng cookie/token
-}));
-
+// app.use(express.json());
+// app.use(express.urlencoded({ extended: true }));
+// app.use(cors({
+//   origin: 'http://localhost:3000', // hoặc '*', nhưng không khuyến khích
+//   credentials: true // nếu dùng cookie/token
+// }));
+app.use(express.json({ limit: '100mb' })); // hoặc lớn hơn nếu cần
+app.use(express.urlencoded({ extended: true, limit: '100mb' }));
+app.use(cors());
 
 // Router
 const routeAdmin = require('./routes/admin/index.route');

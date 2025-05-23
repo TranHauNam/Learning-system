@@ -1,4 +1,5 @@
 const Course = require('../../models/course.model');
+const qs = require('qs');
 
 // Lấy danh sách khóa học của giáo viên
 module.exports.getCourses = async (req, res) => {
@@ -218,6 +219,7 @@ module.exports.addLecture = async (req, res) => {
         });
     }
 };
+
 
 // Cập nhật bài giảng
 module.exports.updateLecture = async (req, res) => {

@@ -48,9 +48,9 @@ module.exports.register = async (req, res) => {
             { email },
             { 
                 email, 
-                otp: otp, 
-                password: hashedPassword,
-                role: role
+                otp, 
+                role,
+                password: hashedPassword
             },
             { upsert: true }
         );
@@ -117,15 +117,17 @@ module.exports.verifyOtp = async (req, res) => {
         newUser.token = token;
         await newUser.save();
 
+        const role = otpStore.role;
+
         // Xóa OTP sau khi đã tạo tài khoản
         await OTP.deleteOne({ email: newUser.email });
 
         return res.status(201).json({
-            message: `Tạo tài khoản ${otpStore.role} thành công`,
+            message: `Tạo tài khoản ${role} thành công`,
             data: {
                 id: newUser._id,
                 email: newUser.email,
-                role: otpStore.role,
+                role: role,
                 token
             }
         });
