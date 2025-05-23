@@ -191,6 +191,30 @@ const TeacherCoursesManager = () => {
   const addAssignment = () => setLecture({ ...lecture, assignments: [...lecture.assignments, { title: '', description: '', attachments: [], dueDate: '' }] });
   const removeAssignment = (idx) => setLecture({ ...lecture, assignments: lecture.assignments.filter((_, i) => i !== idx) });
 
+  // Thêm hàm xử lý upload thumbnail cho form thêm
+  const handleThumbnailUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setNewCourse({ ...newCourse, thumbnail: reader.result });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Thêm hàm xử lý upload thumbnail cho form sửa
+  const handleEditThumbnailUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setEditCourse({ ...editCourse, thumbnail: reader.result });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   return (
     <div className="profile-container">
       <div className="profile-tabs">
@@ -275,7 +299,12 @@ const TeacherCoursesManager = () => {
             </div>
             <div className="form-group">
               <label>Ảnh thumbnail</label>
-              <input className="form-input" value={newCourse.thumbnail} onChange={e => setNewCourse({ ...newCourse, thumbnail: e.target.value })} />
+              <input className="form-input" type="file" accept="image/*" onChange={handleThumbnailUpload} />
+              {newCourse.thumbnail && (
+                <div style={{marginTop:8}}>
+                  <img src={newCourse.thumbnail} alt="thumbnail preview" style={{width:80, height:80, objectFit:'cover', borderRadius:8, border:'1.5px solid #e0e7ef'}} />
+                </div>
+              )}
             </div>
             <div className="form-actions">
               <button type="submit" className="submit-button">Tạo</button>
@@ -321,7 +350,12 @@ const TeacherCoursesManager = () => {
               </div>
               <div className="form-group">
                 <label>Ảnh thumbnail</label>
-                <input value={editCourse.thumbnail} onChange={e => setEditCourse({ ...editCourse, thumbnail: e.target.value })} />
+                <input type="file" accept="image/*" onChange={handleEditThumbnailUpload} />
+                {editCourse.thumbnail && (
+                  <div style={{marginTop:8}}>
+                    <img src={editCourse.thumbnail} alt="thumbnail preview" style={{width:80, height:80, objectFit:'cover', borderRadius:8, border:'1.5px solid #e0e7ef'}} />
+                  </div>
+                )}
               </div>
               <div className="form-actions">
                 <button type="submit" className="submit-button">Lưu</button>

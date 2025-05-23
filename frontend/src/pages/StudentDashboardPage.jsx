@@ -1,9 +1,9 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import TeacherDashboard from '../components/teacher/TeacherDashboard';
+import StudentDashboard from '../components/student/StudentDashboard';
 import { ROUTES, USER_ROLES } from '../constants/config';
 
-const TeacherDashboardPage = () => {
+const StudentDashboardPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -16,7 +16,7 @@ const TeacherDashboardPage = () => {
 
     try {
       const user = JSON.parse(userStr);
-      if (!user.token || user.role !== USER_ROLES.TEACHER) {
+      if (!user.token || user.role !== USER_ROLES.STUDENT) {
         navigate(ROUTES.LOGIN);
       }
     } catch (error) {
@@ -25,7 +25,7 @@ const TeacherDashboardPage = () => {
     }
   }, [navigate]);
 
-  return <TeacherDashboard />;
+  return <StudentDashboard />;
 };
 
-export default TeacherDashboardPage; 
+export default StudentDashboardPage; 

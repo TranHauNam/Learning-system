@@ -31,77 +31,13 @@ module.exports.searchCourses = async (req, res) => {
     }
 };
 
-// Lọc và sắp xếp khóa học
-module.exports.filterAndSortCourses = async (req, res) => {
-    try {
-        const { 
-            minPrice, 
-            maxPrice, 
-            minRating,
-            sortBy = 'createdAt',
-            sortOrder = 'desc',
-            page = 1, 
-            limit = 10 
-        } = req.query;
-
-        const query = {};
-        
-        // Lọc theo giá
-        if (minPrice || maxPrice) {
-            query.price = {};
-            if (minPrice) query.price.$gte = parseFloat(minPrice);
-            if (maxPrice) query.price.$lte = parseFloat(maxPrice);
-        }
-
-        // Lọc theo đánh giá
-        if (minRating) {
-            query.rating = { $gte: parseFloat(minRating) };
-        }
-
-        // Xác định trường sắp xếp
-        let sortField = 'createdAt';
-        if (sortBy === 'price') sortField = 'price';
-        if (sortBy === 'rating') sortField = 'rating';
-        if (sortBy === 'purchases') sortField = 'purchaseCount';
-
-        const sortOptions = {};
-        sortOptions[sortField] = sortOrder === 'asc' ? 1 : -1;
-
-        const courses = await Course.find(query)
-            .populate('teacher', 'name email')
-            .sort(sortOptions)
-            .skip((page - 1) * limit)
-            .limit(parseInt(limit));
-
-        const total = await Course.countDocuments(query);
-
-        return res.status(200).json({
-            message: 'Lọc và sắp xếp khóa học thành công',
-            data: {
-                courses,
-                pagination: {
-                    page: parseInt(page),
-                    limit: parseInt(limit),
-                    total,
-                    totalPages: Math.ceil(total / limit)
-                }
-            }
-        });
-    } catch (error) {
-        console.error('Lỗi lọc và sắp xếp khóa học:', error);
-        return res.status(500).json({
-            message: 'Lỗi máy chủ'
-        });
-    }
-};
-
 // Xem chi tiết khóa học
 module.exports.getCourseDetail = async (req, res) => {
     try {
         const { courseId } = req.params;
 
         const course = await Course.findById(courseId)
-            .populate('teacher', 'name email avatar')
+            .populate('teacher', 'surname middleName phone email avatar')
             .populate('category', 'name');
 
         if (!course) {
@@ -209,44 +145,26 @@ module.exports.checkoutCart = async (req, res) => {
     }
 };
 
-module.exports.downloadFile = async (req, res) => {
+// Lấy tất cả các khóa học đã mua của học viên
+module.exports.getPurchasedCourses = async (req, res) => {
     try {
-        const studentId = req.user.id;
-        const { courseId } = req.params;
-        const { fileUrl } = req.query;
-
-        // Kiểm tra học viên đã mua khóa học chưa
-        const student = await Student.findById(studentId);
-        if (!student.purchasedCourses.includes(courseId)) {
-            return res.status(403).json({ message: 'Bạn chưa mua khóa học này' });
-        }
-
-        // Kiểm tra fileUrl có thuộc khóa học không (bảo mật)
-        const course = await Course.findById(courseId);
-        let isValid = false;
-        // Kiểm tra trong chapters.lessons
-        course.chapters.forEach(chapter => {
-            chapter.lessons.forEach(lesson => {
-                if (lesson.videoUrl === fileUrl || lesson.documentUrl === fileUrl) {
-                    isValid = true;
-                }
-            });
+        const studentId = req.student.id;
+        const student = await Student.findById(studentId).populate({
+            path: 'purchasedCourses',
+            populate: [
+                { path: 'teacher', select: 'name email' },
+                { path: 'category', select: 'name' }
+            ]
         });
-        // Kiểm tra trong documents (nếu có)
-        if (course.documents && Array.isArray(course.documents)) {
-            course.documents.forEach(doc => {
-                if (doc.url === fileUrl) isValid = true;
-            });
+        if (!student) {
+            return res.status(404).json({ message: 'Không tìm thấy học viên' });
         }
-        if (!isValid) {
-            return res.status(403).json({ message: 'File không thuộc khóa học này' });
-        }
-
-        // Trả file về cho client (giả sử fileUrl là đường dẫn trên server)
-        const filePath = path.join(__dirname, '../../uploads', fileUrl);
-        return res.download(filePath);
+        return res.status(200).json({
+            message: 'Lấy danh sách khóa học đã mua thành công',
+            data: student.purchasedCourses
+        });
     } catch (error) {
-        console.error('Lỗi tải file:', error);
+        console.error('Lỗi lấy danh sách khóa học đã mua:', error);
         return res.status(500).json({ message: 'Lỗi máy chủ' });
     }
 }; 

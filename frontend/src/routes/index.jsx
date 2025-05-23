@@ -4,6 +4,9 @@ import LoginPage from '../pages/auth/LoginPage';
 import RegisterPage from '../pages/auth/RegisterPage';
 import { ROUTES } from '../constants/config';
 import TeacherDashboardPage from '../pages/TeacherDashboardPage';
+import StudentDashboardPage from '../pages/StudentDashboardPage';
+import StudentCourseDetail from '../components/student/StudentCourseDetail';
+import StudentSearchPage from '../components/student/StudentSearchPage';
 
 const AppRoutes = () => {
   return (
@@ -16,6 +19,9 @@ const AppRoutes = () => {
       <Route path="*" element={<Navigate to="/login" replace />} />
 
       <Route path={ROUTES.TEACHER_DASHBOARD} element={<TeacherDashboardPage />} />
+      <Route path={ROUTES.STUDENT_DASHBOARD} element={<StudentDashboardPage />} />
+      <Route path="/student/course/:courseId" element={<StudentCourseDetail />} />
+      <Route path="/student/search" element={<StudentSearchPage />} />
     </Routes>
   );
 };

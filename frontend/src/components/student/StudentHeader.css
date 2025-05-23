@@ -1,0 +1,147 @@
+.student-header {
+  background: #f3f6ff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  padding: 0 32px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  z-index: 10;
+}
+
+.student-header-content {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  position: relative;
+}
+
+.student-header-logo {
+  margin-right: 10px;
+}
+
+.logo-circle {
+  width: 40px;
+  height: 40px;
+  background: #2563eb;
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.student-header-search {
+  flex: 1;
+  max-width: 400px;
+  margin-right: 24px;
+}
+
+.student-header-menu-icons {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.student-header-right {
+  display: flex;
+  align-items: center;
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+}
+
+.avatar-container {
+  cursor: pointer;
+  margin-left: 12px;
+}
+
+.avatar-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 48px;
+  right: 0;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  min-width: 140px;
+  z-index: 100;
+  padding: 8px 0;
+}
+
+.dropdown-item {
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 10px 16px;
+  text-align: left;
+  font-size: 1rem;
+  color: #222;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.dropdown-item:hover {
+  background: #f3f7fd;
+}
+
+.menu-icon {
+  font-size: 2rem;
+  color: #25507a;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+.menu-icon:hover {
+  color: #2563eb;
+}
+
+.cart-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: bold;
+  border-radius: 50%;
+  min-width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+.header-cart-btn {
+  background: #e6eefe;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 10px;
+  font-size: 1.45rem;
+  color: #2563eb;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  position: relative;
+}
+.header-cart-btn:hover {
+  background: #2563eb;
+  color: #fff;
+} 
