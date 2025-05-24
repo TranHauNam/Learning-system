@@ -1,13 +1,17 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useContext } from 'react';
 import SearchBar from '../common/SearchBar';
 import { FaUserCircle, FaHome, FaGraduationCap, FaBookOpen, FaRegIdBadge, FaShoppingCart } from 'react-icons/fa';
 import './StudentHeader.css';
+import { CartContext } from '../common/cartContext.jsx';
+import { useNavigate } from 'react-router-dom';
 
-const StudentHeader = ({ onSearchCourses, cartCount = 0 }) => {
+const StudentHeader = ({ onSearchCourses }) => {
   const [searchValue, setSearchValue] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef(null);
   const [avatar, setAvatar] = useState(null);
+  const { cartCount } = useContext(CartContext);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const storedAvatar = localStorage.getItem('studentAvatar');
@@ -65,11 +69,13 @@ const StudentHeader = ({ onSearchCourses, cartCount = 0 }) => {
         </div>
         {/* Cart + Avatar + Dropdown */}
         <div className="student-header-right" ref={dropdownRef}>
-          <button className="header-cart-btn">
-            <FaShoppingCart />
-            {cartCount > 0 && (
-              <span className="cart-badge">{cartCount}</span>
-            )}
+          <button className="header-cart-btn" onClick={() => navigate('/student/cart')}>
+            <div style={{position:'relative', width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+              <FaShoppingCart />
+              {cartCount > 0 && (
+                <span className="cart-badge">{cartCount}</span>
+              )}
+            </div>
           </button>
           <div 
             className="avatar-container" 

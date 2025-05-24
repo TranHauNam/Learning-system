@@ -7,6 +7,7 @@ import TeacherDashboardPage from '../pages/TeacherDashboardPage';
 import StudentDashboardPage from '../pages/StudentDashboardPage';
 import StudentCourseDetail from '../components/student/StudentCourseDetail';
 import StudentSearchPage from '../components/student/StudentSearchPage';
+import StudentCartPage from '../components/student/StudentCartPage';
 
 const AppRoutes = () => {
   return (
@@ -22,6 +23,7 @@ const AppRoutes = () => {
       <Route path={ROUTES.STUDENT_DASHBOARD} element={<StudentDashboardPage />} />
       <Route path="/student/course/:courseId" element={<StudentCourseDetail />} />
       <Route path="/student/search" element={<StudentSearchPage />} />
+      <Route path="/student/cart" element={<StudentCartPage />} />
     </Routes>
   );
 };

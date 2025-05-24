@@ -5,6 +5,7 @@ import StudentHeader from './StudentHeader';
 import './StudentCourseDetail.css';
 import { FaShoppingCart, FaCreditCard } from 'react-icons/fa';
 import { AlertContext } from '../common/alertContext';
+import { CartContext } from '../common/cartContext.jsx';
 
 const benefitList = [
   {
@@ -31,6 +32,7 @@ const StudentCourseDetail = () => {
   const [error, setError] = useState('');
   const [addCartLoading, setAddCartLoading] = useState(false);
   const { showAlert } = useContext(AlertContext);
+  const { incrementCart } = useContext(CartContext);
 
   useEffect(() => {
     const fetchDetail = async () => {
@@ -54,7 +56,7 @@ const StudentCourseDetail = () => {
     try {
       await studentService.addToCart(course._id);
       showAlert('Đã thêm vào giỏ hàng!');
-      // TODO: gọi callback/context cập nhật số lượng giỏ hàng ở header nếu có
+      incrementCart();
     } catch {
       showAlert('Thêm vào giỏ hàng thất bại!');
     } finally {

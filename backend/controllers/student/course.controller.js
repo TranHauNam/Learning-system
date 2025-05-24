@@ -167,4 +167,31 @@ module.exports.getPurchasedCourses = async (req, res) => {
         console.error('Lỗi lấy danh sách khóa học đã mua:', error);
         return res.status(500).json({ message: 'Lỗi máy chủ' });
     }
+};
+
+// Lấy giỏ hàng của học viên
+module.exports.getCart = async (req, res) => {
+    try {
+        const studentId = req.student.id;
+        const cart = await Cart.findOne({ student: studentId }).populate({
+            path: 'courses',
+            populate: [
+                { path: 'teacher', select: 'surname middleName email' },
+                { path: 'category', select: 'name' }
+            ]
+        });
+        if (!cart) {
+            return res.status(200).json({
+                message: 'Giỏ hàng trống',
+                data: []
+            });
+        }
+        return res.status(200).json({
+            message: 'Lấy giỏ hàng thành công',
+            data: cart.courses
+        });
+    } catch (error) {
+        console.error('Lỗi lấy giỏ hàng:', error);
+        return res.status(500).json({ message: 'Lỗi máy chủ' });
+    }
 }; 

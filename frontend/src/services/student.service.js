@@ -78,10 +78,22 @@ const getCourseDetail = async (courseId) => {
   }
 };
 
+// Lấy giỏ hàng
+const getCart = async () => {
+  try {
+    const res = await axiosInstance.get('/course/cart');
+    return res.data;
+  } catch (error) {
+    console.error('Get Cart Error:', error);
+    throw error;
+  }
+};
+
 export const studentService = {
   searchCourses,
   addToCart,
   checkoutCart,
   getPurchasedCourses,
-  getCourseDetail
+  getCourseDetail,
+  getCart
 }; 
