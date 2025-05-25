@@ -194,4 +194,18 @@ module.exports.getCart = async (req, res) => {
         console.error('Lỗi lấy giỏ hàng:', error);
         return res.status(500).json({ message: 'Lỗi máy chủ' });
     }
+};
+
+// Lấy danh sách bài giảng của một khóa học
+module.exports.getLectures = async (req, res) => {
+    try {
+        const { courseId } = req.params;
+        const course = await Course.findById(courseId).select('lectures');
+        if (!course) {
+            return res.status(404).json({ message: 'Không tìm thấy khóa học' });
+        }
+        res.json({ lectures: course.lectures });
+    } catch (error) {
+        res.status(500).json({ message: 'Lỗi server', error: error.message });
+    }
 }; 

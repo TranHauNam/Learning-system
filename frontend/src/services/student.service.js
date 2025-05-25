@@ -89,11 +89,23 @@ const getCart = async () => {
   }
 };
 
+// Lấy danh sách bài giảng của một khóa học
+const getLectures = async (courseId) => {
+  try {
+    const res = await axiosInstance.get(`/course/${courseId}/lectures`);
+    return res.data;
+  } catch (error) {
+    console.error('Get Lectures Error:', error);
+    throw error;
+  }
+};
+
 export const studentService = {
   searchCourses,
   addToCart,
   checkoutCart,
   getPurchasedCourses,
   getCourseDetail,
-  getCart
+  getCart,
+  getLectures
 }; 

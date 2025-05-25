@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-
 const courseSchema = new mongoose.Schema({
     title: {
         type: String,
@@ -83,7 +82,7 @@ const courseSchema = new mongoose.Schema({
     status: {
         type: String,
         enum: ['draft', 'published', 'archived'],
-        default: 'draft'
+        default: 'published'
     },
     rating: {
         average: {

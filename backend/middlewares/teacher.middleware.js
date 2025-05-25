@@ -1,6 +1,5 @@
 const jwt = require('jsonwebtoken');
 const Teacher = require('../models/teacher.model');
-
 module.exports.authenticate = async (req, res, next) => {
     try {
         if (!req.headers.authorization || !req.headers.authorization.startsWith('Bearer ')) {

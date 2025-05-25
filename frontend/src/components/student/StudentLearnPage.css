@@ -1,0 +1,116 @@
+.learn-main {
+  max-width: 1200px;
+  margin: 36px auto 0 auto;
+  background: #f8fafc;
+  border-radius: 18px;
+  padding: 36px 32px 48px 32px;
+  min-height: 70vh;
+  box-shadow: 0 2px 12px rgba(37,99,235,0.08);
+}
+
+.learn-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2563eb;
+  margin-bottom: 24px;
+  letter-spacing: 0.5px;
+}
+
+.learn-layout {
+  display: flex;
+  gap: 32px;
+}
+
+.learn-lectures-list {
+  min-width: 260px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(37,99,235,0.06);
+  padding: 18px 0 18px 0;
+  height: fit-content;
+}
+.learn-lectures-list-title {
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: #2563eb;
+  margin-bottom: 12px;
+  padding-left: 24px;
+}
+.learn-lectures-list ul {
+  list-style: none;
+  padding: 0 0 0 0;
+  margin: 0;
+}
+.learn-lecture-item {
+  padding: 10px 24px;
+  border-radius: 8px;
+  background: #f3f6ff;
+  color: #222;
+  margin-bottom: 8px;
+  cursor: pointer;
+  font-weight: 400;
+  transition: background 0.18s, color 0.18s;
+}
+.learn-lecture-item.active,
+.learn-lecture-item:hover {
+  background: #2563eb;
+  color: #fff;
+  font-weight: 600;
+}
+
+.learn-lecture-content {
+  flex: 1;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(37,99,235,0.08);
+  padding: 32px 28px;
+  min-height: 340px;
+  display: flex;
+  flex-direction: column;
+}
+.learn-lecture-content h3 {
+  color: #2563eb;
+  font-size: 1.4rem;
+  margin-bottom: 10px;
+}
+.learn-lecture-content .desc {
+  margin: 12px 0 18px 0;
+  color: #555;
+  font-size: 1.08rem;
+}
+.learn-lecture-content video {
+  border-radius: 8px;
+  margin-bottom: 16px;
+  background: #000;
+}
+.learn-lecture-content .learn-docs-title {
+  font-weight: bold;
+  margin-bottom: 8px;
+  color: #2563eb;
+}
+.learn-lecture-content ul {
+  padding-left: 18px;
+}
+.learn-lecture-content a {
+  color: #2563eb;
+  text-decoration: underline;
+  font-size: 1.04rem;
+}
+
+@media (max-width: 900px) {
+  .learn-main {
+    padding: 18px 6px 32px 6px;
+  }
+  .learn-layout {
+    flex-direction: column;
+    gap: 18px;
+  }
+  .learn-lecture-content {
+    padding: 18px 8px;
+  }
+  .learn-lectures-list {
+    min-width: 0;
+    width: 100%;
+    padding: 12px 0;
+  }
+} 

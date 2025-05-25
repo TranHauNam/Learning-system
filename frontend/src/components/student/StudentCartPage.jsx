@@ -3,6 +3,7 @@ import { studentService } from '../../services/student.service';
 import StudentHeader from './StudentHeader';
 import './StudentCartPage.css';
 import { CartContext } from '../common/cartContext.jsx';
+import { useNavigate } from 'react-router-dom';
 
 const StudentCartPage = () => {
   const [cartCourses, setCartCourses] = useState([]);
@@ -11,6 +12,7 @@ const StudentCartPage = () => {
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [checkoutMsg, setCheckoutMsg] = useState('');
   const { setCartCount } = useContext(CartContext);
+  const navigate = useNavigate();
 
   const fetchCart = async () => {
     setLoading(true);
@@ -37,6 +39,10 @@ const StudentCartPage = () => {
       setCheckoutMsg(res.message || 'Thanh toán thành công!');
       await fetchCart();
       setCartCount(0); // Reset số lượng giỏ hàng về 0
+      // Điều hướng sang home sau khi mua thành công
+      setTimeout(() => {
+        navigate('/student/home');
+      }, 1200);
     } catch {
       setCheckoutMsg('Thanh toán thất bại!');
     } finally {

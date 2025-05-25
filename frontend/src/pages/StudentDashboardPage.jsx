@@ -1,9 +1,9 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import StudentDashboard from '../components/student/StudentDashboard';
+import StudentHome from '../components/student/StudentHome';
 import { ROUTES, USER_ROLES } from '../constants/config';
 
-const StudentDashboardPage = () => {
+const StudentHomePage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -25,7 +25,7 @@ const StudentDashboardPage = () => {
     }
   }, [navigate]);
 
-  return <StudentDashboard />;
+  return <StudentHome />;
 };
 
-export default StudentDashboardPage; 
+export default StudentHomePage; 

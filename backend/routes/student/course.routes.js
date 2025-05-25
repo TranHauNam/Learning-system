@@ -9,5 +9,6 @@ router.post('/checkout', middleware.authenticate, controller.checkoutCart);
 router.get('/purchased-courses', middleware.authenticate, controller.getPurchasedCourses);
 router.get('/cart', middleware.authenticate, controller.getCart);
 router.get('/:courseId', controller.getCourseDetail);
+router.get('/:courseId/lectures', controller.getLectures);
 
 module.exports = router; 

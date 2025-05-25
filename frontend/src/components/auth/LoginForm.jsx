@@ -32,7 +32,7 @@ const LoginForm = () => {
       
       if (userData && userData.token && userData.role) {
         if (userData.role === USER_ROLES.STUDENT) {
-          navigate(ROUTES.STUDENT_DASHBOARD);
+          navigate('/student/home');
         } else if (userData.role === USER_ROLES.TEACHER) {
           navigate(ROUTES.TEACHER_DASHBOARD);
         } else {

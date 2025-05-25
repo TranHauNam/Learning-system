@@ -5,7 +5,7 @@ export const ROUTES = {
   LOGIN: '/login',
   REGISTER: '/register',
   TEACHER_DASHBOARD: '/teacher/dashboard',
-  STUDENT_DASHBOARD: '/student/dashboard',
+  STUDENT_DASHBOARD: '/student/home',
 };
 
 export const USER_ROLES = {

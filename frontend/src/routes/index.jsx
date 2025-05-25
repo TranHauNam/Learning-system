@@ -8,6 +8,8 @@ import StudentDashboardPage from '../pages/StudentDashboardPage';
 import StudentCourseDetail from '../components/student/StudentCourseDetail';
 import StudentSearchPage from '../components/student/StudentSearchPage';
 import StudentCartPage from '../components/student/StudentCartPage';
+import StudentHome from '../components/student/StudentHome';
+import StudentLearnPage from '../components/student/StudentLearnPage';
 
 const AppRoutes = () => {
   return (
@@ -24,6 +26,8 @@ const AppRoutes = () => {
       <Route path="/student/course/:courseId" element={<StudentCourseDetail />} />
       <Route path="/student/search" element={<StudentSearchPage />} />
       <Route path="/student/cart" element={<StudentCartPage />} />
+      <Route path="/student/home" element={<StudentHome />} />
+      <Route path="/student/course/:courseId/learn" element={<StudentLearnPage />} />
     </Routes>
   );
 };

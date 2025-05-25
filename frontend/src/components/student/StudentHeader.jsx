@@ -62,7 +62,7 @@ const StudentHeader = ({ onSearchCourses }) => {
         </div>
         {/* Menu icons */}
         <div className="student-header-menu-icons">
-          <FaHome className="menu-icon" />
+          <FaHome className="menu-icon" onClick={() => navigate('/student/home')} />
           <FaGraduationCap className="menu-icon" />
           <FaBookOpen className="menu-icon" />
           <FaRegIdBadge className="menu-icon" />
@@ -89,7 +89,7 @@ const StudentHeader = ({ onSearchCourses }) => {
           </div>
           {showDropdown && (
             <div className="dropdown-menu">
-              <button className="dropdown-item" onClick={() => window.location.href='/student/dashboard'}>
+              <button className="dropdown-item" onClick={() => window.location.href='/student/home'}>
                 Hồ sơ cá nhân
               </button>
               <button className="dropdown-item" onClick={handleLogout}>
